@@ -3,11 +3,12 @@
 import os
 from time import time
 import numpy as np
-from memmap_array_utils import read_ndarray_from_memmap_sequence
-from directory_tree_utils import memmap_fname_iterator
 from astropy.table import Table
 from halotools.empirical_models import enforce_periodicity_of_box
 from halotools.utils import crossmatch
+
+from .memmap_array_utils import read_ndarray_from_memmap_sequence
+from .directory_tree_utils import memmap_fname_iterator
 
 default_galprops = list((
     'sfr_history_main_prog', 'sm_history_main_prog',
@@ -17,20 +18,21 @@ default_galprops = list((
 __all__ = ('load_mock_from_binaries', 'value_added_mock')
 
 
-def load_mock_from_binaries(root_dirname, subvolumes, galprops=default_galprops):
+def load_mock_from_binaries(subvolumes, root_dirname=None, galprops=default_galprops):
     """ Load the mock catalog into memory.
 
     Parameters
     ----------
-    root_dirname : string
-        Name of the parent directory of the collection
-        subdirectories with names ``subvol_0``, ``subvol_1``, ``subvol_2``, etc.
-
     subvolumes : sequence of integers
         Sequence specifies which subvolumes will be used to load data,
         e.g., subvolumes=np.arange(144) to load all 144 subvolumes of
         ``behroozi17`` mock data into memory,
         or np.arange(20) to load only the first twenty.
+
+    root_dirname : string, optional
+        Name of the parent directory of the collection
+        subdirectories with names ``subvol_0``, ``subvol_1``, ``subvol_2``, etc.
+        Default value is set in `umachine_pyio.cfg`.
 
     galprops : sequence of strings, optional
         List of galaxy properties to include in the mock catalog.
@@ -43,6 +45,10 @@ def load_mock_from_binaries(root_dirname, subvolumes, galprops=default_galprops)
     mock : Astropy Table
         Table of mock galaxies with the requested properties from the requested subvolumes.
     """
+    from . import conf
+    if root_dirname is None:
+        root_dirname = conf.umachine_mocks_root_dirname
+
     start = time()
 
     galprops = np.array(list(set(np.atleast_1d(galprops))))
