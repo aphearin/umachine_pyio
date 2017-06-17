@@ -86,7 +86,7 @@ def list_available_columns(root_dirname=None):
         subdirname_generator(os.path.join(root_dirname, 'subvol_0'), '*'))
 
 
-def get_snapshot_times(root_dirname):
+def get_snapshot_times(root_dirname=None):
     """ Determine the age of the Universe at each snapshot of the mock
     by searching in the standard location within the input ``root_dirname``
     for the Numpy binary data storing this information.
@@ -102,6 +102,9 @@ def get_snapshot_times(root_dirname):
     cosmic_age : ndarray
         Array of shape (num_snapshots, ) of the age of the universe in units of Gyr
     """
+    from . import conf
+    if root_dirname is None:
+        root_dirname = conf.umachine_mocks_root_dirname
     fname = os.path.join(root_dirname, 'simulation_data', 'snapshot_times.npy')
     assert os.path.isfile(fname), "snapshot_times.npy file does not exist in {0}".format(root_dirname)
     return np.load(fname)
