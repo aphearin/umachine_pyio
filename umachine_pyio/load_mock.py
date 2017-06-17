@@ -6,6 +6,7 @@ import numpy as np
 from astropy.table import Table
 from halotools.empirical_models import enforce_periodicity_of_box
 from halotools.utils import crossmatch
+import fnmatch
 
 from .memmap_array_utils import read_ndarray_from_memmap_sequence
 from .directory_tree_utils import memmap_fname_iterator
@@ -64,6 +65,25 @@ def load_mock_from_binaries(subvolumes, root_dirname=None, galprops=default_galp
     end = time()
     print("Total runtime = {0:.2f} seconds".format(end-start))
     return mock
+
+
+def subdirname_generator(root_dirname, subdirname_filepat):
+    """ Yield the absolute dirname of subdirectories of ``root_dirname`` matching the input pattern
+    """
+
+    for path, dirlist, filelist in os.walk(root_dirname):
+        for dirname in fnmatch.filter(dirlist, subdirname_filepat):
+            yield os.path.join(root_dirname, dirname)
+
+
+def list_available_columns(root_dirname=None):
+    """
+    """
+    from . import conf
+    if root_dirname is None:
+        root_dirname = conf.umachine_mocks_root_dirname
+    return list(str(os.path.basename(subdir)) for subdir in
+        subdirname_generator(os.path.join(root_dirname, 'subvol_0'), '*'))
 
 
 def get_snapshot_times(root_dirname):
