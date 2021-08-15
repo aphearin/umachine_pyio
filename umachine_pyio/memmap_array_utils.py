@@ -51,7 +51,7 @@ def write_shape_and_dtype_to_ascii(output_fname, shape, dtype):
     line1 = "shape " + " ".join(str(i) for i in shape) + "\n"
     line2 = "dtype " + _unique_numpy_dtype_string(dtype) + "\n"
 
-    with open(output_fname, "wb") as f:
+    with open(output_fname, "w") as f:
         f.write(line1)
         f.write(line2)
 

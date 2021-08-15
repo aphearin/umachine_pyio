@@ -83,7 +83,7 @@ for subvol_index, ascii_fname in fname_iter:
         args.column_info_fname,
         subvol_output_dirname,
         requested_colnames,
-        10 ** args.log_sm_cut,
+        10 ** float(args.log_sm_cut),
     )
     end1 = time()
     msg = "Runtime to reduce {0} = {1}".format(output_subdir, end1 - start1)
