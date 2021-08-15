@@ -7,7 +7,7 @@ import numpy as np
 
 
 def write_ndarray_to_memmap(arr, output_fname):
-    """ Create a Numpy memmap of the input array, additionally storing the
+    """Create a Numpy memmap of the input array, additionally storing the
     shape and dtype in an ASCII file with filename pattern ``*_shape_and_dtype``,
     facilitating calculation of binary offsets.
     The read_shape_and_dtype_from_ascii function provides
@@ -21,19 +21,18 @@ def write_ndarray_to_memmap(arr, output_fname):
     output_fname : string
         Filename of the memmap binary, including absolute path.
     """
-    mmp = np.memmap(output_fname, mode='w+', dtype=arr.dtype, shape=arr.shape)
+    mmp = np.memmap(output_fname, mode="w+", dtype=arr.dtype, shape=arr.shape)
     mmp[:] = arr[:]
     del mmp
 
     dirname = os.path.dirname(output_fname)
-    basename = os.path.basename(dirname) + '_shape_and_dtype.txt'
+    basename = os.path.basename(dirname) + "_shape_and_dtype.txt"
     shape_and_dtype_output_fname = os.path.join(dirname, basename)
-    write_shape_and_dtype_to_ascii(shape_and_dtype_output_fname,
-        arr.shape, arr.dtype)
+    write_shape_and_dtype_to_ascii(shape_and_dtype_output_fname, arr.shape, arr.dtype)
 
 
 def write_shape_and_dtype_to_ascii(output_fname, shape, dtype):
-    """ Function creates an ASCII file that serves as metadata about a
+    """Function creates an ASCII file that serves as metadata about a
     memory-mapped ndarray in a way that is readable by the
     `read_shape_and_dtype_from_ascii` function.
 
@@ -49,16 +48,16 @@ def write_shape_and_dtype_to_ascii(output_fname, shape, dtype):
         Instance of a Numpy dtype object.
     """
 
-    line1 = 'shape ' + ' '.join(str(i) for i in shape) + '\n'
-    line2 = 'dtype ' + _unique_numpy_dtype_string(dtype) + '\n'
+    line1 = "shape " + " ".join(str(i) for i in shape) + "\n"
+    line2 = "dtype " + _unique_numpy_dtype_string(dtype) + "\n"
 
-    with open(output_fname, 'wb') as f:
+    with open(output_fname, "wb") as f:
         f.write(line1)
         f.write(line2)
 
 
 def read_shape_and_dtype_from_ascii(metadata_fname):
-    """ Function reads the input ASCII data and returns the shape and dtype
+    """Function reads the input ASCII data and returns the shape and dtype
     of the ndarray stored in the same directory. See Notes below for description
     of the assumed format of the ASCII data.
 
@@ -96,7 +95,7 @@ def read_shape_and_dtype_from_ascii(metadata_fname):
     The second row stores the Numpy data type. So your second row should look
     something like, ``dtype f4`` or ``dtype i8``.
     """
-    with open(metadata_fname, 'r') as f:
+    with open(metadata_fname, "r") as f:
         line1 = next(f).strip().split()
         line2 = next(f).strip().split()
     shape = tuple(int(i) for i in line1[1:])
@@ -105,7 +104,7 @@ def read_shape_and_dtype_from_ascii(metadata_fname):
 
 
 def write_structured_array_to_memmap(arr, parent_dirname, *columns_to_save):
-    """ Function saves a memory map of the desired columns of a structured array
+    """Function saves a memory map of the desired columns of a structured array
     according to the standard directory tree layout.
 
     Parameters
@@ -134,9 +133,9 @@ def write_structured_array_to_memmap(arr, parent_dirname, *columns_to_save):
     dt = arr.dtype
 
     if len(columns_to_save) == 0:
-        columns_to_save = ['all']
+        columns_to_save = ["all"]
 
-    if columns_to_save[0] is 'all':
+    if columns_to_save[0] == "all":
         columns_to_save = dt.names
 
     for colname in columns_to_save:
@@ -149,12 +148,12 @@ def write_structured_array_to_memmap(arr, parent_dirname, *columns_to_save):
         except OSError:
             pass
 
-        output_fname = os.path.join(output_dirname, colname + '.memmap')
+        output_fname = os.path.join(output_dirname, colname + ".memmap")
         write_ndarray_to_memmap(arr[colname], output_fname)
 
 
 def determine_composite_shape_from_ascii_sequence(*shapes):
-    """ From an input sequence of shapes of Numpy arrays,
+    """From an input sequence of shapes of Numpy arrays,
     determine the shape of the concatenated array, where concatenation is along
     axis-0.
 
@@ -180,7 +179,7 @@ def determine_composite_shape_from_ascii_sequence(*shapes):
 
 
 def read_ndarray_from_memmap_sequence(memmap_fnames, shape_fnames):
-    """ From an input sequence of filenames to memory-mapped Numpy arrays of known shape,
+    """From an input sequence of filenames to memory-mapped Numpy arrays of known shape,
     return a single Numpy array storing the concatenation of these arrays.
 
     Parameters
@@ -198,15 +197,16 @@ def read_ndarray_from_memmap_sequence(memmap_fnames, shape_fnames):
     Returns
     -------
     arr : ndarray
-        Numpy array storing a concatenation of all the memory-mapped arrays in the sequence
+        Numpy array storing a concatenation of all the memory-mapped arrays
     """
     memmap_fnames = np.atleast_1d(memmap_fnames)
     shape_fnames = np.atleast_1d(shape_fnames)
     msg = "Must have the same number of ``shapes`` as ``memmap_fnames``"
     assert len(memmap_fnames) == len(shape_fnames), msg
 
-    shapes = list(read_shape_and_dtype_from_ascii(shape_fname)[0] for
-        shape_fname in shape_fnames)
+    shapes = list(
+        read_shape_and_dtype_from_ascii(shape_fname)[0] for shape_fname in shape_fnames
+    )
     dt = read_shape_and_dtype_from_ascii(shape_fnames[0])[1]
 
     arr = np.empty(determine_composite_shape_from_ascii_sequence(*shapes), dtype=dt)
@@ -214,13 +214,13 @@ def read_ndarray_from_memmap_sequence(memmap_fnames, shape_fnames):
     ifirst = 0
     for fname, shape in zip(memmap_fnames, shapes):
         ilast = ifirst + shape[0]
-        arr[ifirst:ilast] = np.memmap(fname, shape=shape, dtype=dt, mode='r')
+        arr[ifirst:ilast] = np.memmap(fname, shape=shape, dtype=dt, mode="r")
         ifirst = ilast
     return arr
 
 
 def _unique_numpy_dtype_string(dtype):
-    """ Private function providing a standardized string used to characterize
+    """Private function providing a standardized string used to characterize
     a Numpy dtype
     """
     dt = np.dtype(dtype)
