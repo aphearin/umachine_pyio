@@ -13,6 +13,7 @@ def write_ascii_to_memmap_tree(
     output_dirname,
     requested_colnames,
     stellar_mass_cut,
+    mpeak_cut,
 ):
     """"""
     colnums_to_yield, data_array_indices = _determine_colnums_to_yield(
@@ -21,13 +22,16 @@ def write_ascii_to_memmap_tree(
 
     full_columns_dict = _build_colnums_dict(sf_history_ascii_fname)
     stellar_mass_colnum = full_columns_dict["obs_sm"][0]
+    mpeak_colnum = full_columns_dict["mpeak"][0]
 
     raw_data_array = np.array(
         list(
-            _stellar_mass_cut_data_generator(
+            _cut_data_generator(
                 sf_history_ascii_fname,
                 stellar_mass_colnum,
                 stellar_mass_cut,
+                mpeak_colnum,
+                mpeak_cut,
                 colnums_to_yield,
             )
         )
@@ -47,8 +51,13 @@ def write_ascii_to_memmap_tree(
         write_structured_array_to_memmap(data, output_dirname, colname)
 
 
-def _stellar_mass_cut_data_generator(
-    sf_history_ascii_fname, stellar_mass_colnum, stellar_mass_cut, colnums_to_yield
+def _cut_data_generator(
+    sf_history_ascii_fname,
+    stellar_mass_colnum,
+    stellar_mass_cut,
+    mpeak_colnum,
+    mpeak_cut,
+    colnums_to_yield,
 ):
     """"""
     opener = _compression_safe_opener(sf_history_ascii_fname)
@@ -72,7 +81,9 @@ def _stellar_mass_cut_data_generator(
         )  # First non-header line has already been retrieved
         while True:
             try:
-                if float(line[stellar_mass_colnum]) >= stellar_mass_cut:
+                keep = float(line[stellar_mass_colnum]) >= stellar_mass_cut
+                keep &= float(line[mpeak_colnum]) >= mpeak_cut
+                if keep:
                     yield tuple(line[i] for i in colnums_to_yield)
                 line = next(fileobj).strip().split()
             except StopIteration:
