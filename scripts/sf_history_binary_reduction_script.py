@@ -88,11 +88,14 @@ if __name__ == "__main__":
         args.fname_suffix_pattern,
     )
 
+    scale_factor_subdrname = "a_" + args.scale_factor
+    output_dirname = os.path.join(args.output_dirname, scale_factor_subdrname)
+    os.makedirs(output_dirname, exist_ok=True)
     start = time()
     print("...beginning loop over files")
     for subvol_index, ascii_fname in fname_iter:
         output_subdir = "subvol_" + str(subvol_index)
-        subvol_output_dirname = os.path.join(args.output_dirname, output_subdir)
+        subvol_output_dirname = os.path.join(output_dirname, output_subdir)
 
         start1 = time()
         write_ascii_to_memmap_tree(
@@ -104,7 +107,8 @@ if __name__ == "__main__":
             float(args.mpeak_cut),
         )
         end1 = time()
-        msg = "Runtime to reduce {0} = {1}".format(output_subdir, end1 - start1)
+        runtime1 = end1 - start1
+        msg = "Runtime to reduce {0} = {1:.1f} seconds".format(output_subdir, runtime1)
         print(msg)
 
     end = time()
