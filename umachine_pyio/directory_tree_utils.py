@@ -2,6 +2,7 @@
 """
 import os
 import fnmatch
+from glob import glob
 
 
 def sf_history_ascii_fname_iterator(subvol_labels, root_dirname, prefix, suffix):
@@ -22,6 +23,34 @@ def sf_history_ascii_fname_iterator(subvol_labels, root_dirname, prefix, suffix)
             ascii_basename = prefix + "." + str(subvol_index) + suffix
             ascii_fname = os.path.join(root_dirname, ascii_basename)
             yield subvol_index, ascii_fname
+
+
+def _get_subvol_id_strings(subvolumes):
+    n_char = max([len(str(x)) for x in subvolumes])
+    subvol_id_strings = [str(x).zfill(n_char) for x in subvolumes]
+    return subvol_id_strings
+
+
+def _infer_sorted_subvol_ids(drn):
+    """Scan the drn for the list of all available subvolumes
+
+    Parameters
+    ----------
+    drn : string
+        Parent directory of all subdirectories such as 'subvol_123'
+
+    Returns
+    -------
+    sorted_subvol_ids : list of strings
+        If drn contains subvol_25, subvol_102, subvol_5 then
+        function will return ['5', '25', ..., '102']
+        Results will be sorted according to subvolume number
+
+    """
+    subdrn_list = glob(os.path.join(drn, "subvol_*"))
+    subvol_ids = _get_subvol_id_strings([os.path.basename(s)[7:] for s in subdrn_list])
+    subvol_ids = sorted(subvol_ids, key=lambda x: int(x))
+    return subvol_ids
 
 
 def subvol_dirname_iterator(root_dirname, *subvol_labels):
