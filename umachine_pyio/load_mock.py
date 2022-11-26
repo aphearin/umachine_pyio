@@ -81,7 +81,8 @@ def load_mock_from_binaries(subvolumes, root_dirname, galprops=default_galprops)
     return mock
 
 
-def read_subvol_ids(root_dirname, *subvol_labels, shape_key="halo_id"):
+def subvol_id_and_ngals_generator(subvol_labels, root_dirname, shape_key="halo_id"):
+    """Yield the subvolume ID and number of galaxies for each subvolume label"""
     for subvol_dirname in subvol_dirname_iterator(root_dirname, *subvol_labels):
         subvol_basedrn = os.path.basename(subvol_dirname)  # 'subvol_N'
         subvol_string = "_".join(os.path.basename(subvol_basedrn).split("_")[1:])
@@ -90,8 +91,9 @@ def read_subvol_ids(root_dirname, *subvol_labels, shape_key="halo_id"):
         shape_basename = shape_key + "_shape_and_dtype.txt"
         shape_fname = os.path.join(shape_dirname, shape_basename)
         shape = read_shape_and_dtype_from_ascii(shape_fname)[0]
+        ngals = shape[0]
 
-        yield subvol_string, shape
+        yield subvol_string, ngals
 
 
 def subdirname_generator(root_dirname, subdirname_filepat):
