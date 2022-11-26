@@ -53,6 +53,32 @@ def _infer_sorted_subvol_ids(drn):
     return subvol_ids
 
 
+def _infer_subvol_number_from_subvol_triplet(subvol_triplet, ndiv_y, ndiv_z):
+    """Calculate subvolume number from 'i_j_k'
+
+    Parameters
+    ----------
+    subvol_triplet : string
+        Should be of the form 'i_j_k'
+
+    ndiv_y : int
+        Total number of subdivisions in y-dimension
+
+    ndiv_z : int
+        Total number of subdivisions in z-dimension
+
+    """
+    ix, iy, iz = [int(s) for s in subvol_triplet.split("_")]
+    return sum(list((ndiv_y * ndiv_z * ix, ndiv_z * iy, iz)))
+
+
+def _infer_subvol_triplet_from_subvol_number(subvol_num, ndiv_y, ndiv_z):
+    """"""
+    i, rem = divmod(int(subvol_num), ndiv_y * ndiv_z)
+    j, k = divmod(rem, ndiv_z)
+    return "_".join((str(i), str(j), str(k)))
+
+
 def subvol_dirname_iterator(root_dirname, *subvol_labels):
     """Generator yields a sequence of absolute paths where the data from
     each subvolume is stored
