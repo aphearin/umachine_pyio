@@ -9,7 +9,8 @@ from halotools.utils import crossmatch
 import fnmatch
 
 from .memmap_array_utils import read_ndarray_from_memmap_sequence
-from .directory_tree_utils import memmap_fname_iterator
+from .memmap_array_utils import read_shape_and_dtype_from_ascii
+from .directory_tree_utils import memmap_fname_iterator, subvol_dirname_iterator
 
 default_galprops = list(
     (
@@ -78,6 +79,19 @@ def load_mock_from_binaries(subvolumes, root_dirname, galprops=default_galprops)
     end = time()
     print("Total runtime = {0:.2f} seconds".format(end - start))
     return mock
+
+
+def read_subvol_ids(root_dirname, *subvol_labels, shape_key="halo_id"):
+    for subvol_dirname in subvol_dirname_iterator(root_dirname, *subvol_labels):
+        subvol_basedrn = os.path.basename(subvol_dirname)  # 'subvol_N'
+        subvol_string = "_".join(os.path.basename(subvol_basedrn).split("_")[1:])
+
+        shape_dirname = os.path.join(subvol_dirname, shape_key)
+        shape_basename = shape_key + "_shape_and_dtype.txt"
+        shape_fname = os.path.join(shape_dirname, shape_basename)
+        shape = read_shape_and_dtype_from_ascii(shape_fname)[0]
+
+        yield subvol_string, shape
 
 
 def subdirname_generator(root_dirname, subdirname_filepat):
