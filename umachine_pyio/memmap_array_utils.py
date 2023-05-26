@@ -61,11 +61,6 @@ def read_shape_and_dtype_from_ascii(metadata_fname):
     of the ndarray stored in the same directory. See Notes below for description
     of the assumed format of the ASCII data.
 
-    Examples
-    --------
-    >>> shape, dtype = read_shape_and_dtype_from_ascii(metadata_fname)  # doctest: +SKIP
-    >>> mmp = np.memmap(mmp_fname, dtype=dtype, mode='r', shape=shape)  # doctest: +SKIP
-
     Parameters
     ----------
     metadata_fname : string
@@ -78,6 +73,12 @@ def read_shape_and_dtype_from_ascii(metadata_fname):
 
     dtype : object
         Instance of a Numpy dtype object.
+
+    Examples
+    --------
+    >>> shape, dtype = read_shape_and_dtype_from_ascii(metadata_fname)  # doctest: +SKIP
+    >>> mmp = np.memmap(mmp_fname, dtype=dtype, mode='r', shape=shape)  # doctest: +SKIP
+
 
     Notes
     -----

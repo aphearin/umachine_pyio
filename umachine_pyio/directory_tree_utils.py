@@ -2,17 +2,17 @@
 """
 import os
 import fnmatch
+from glob import glob
 
 
 def sf_history_ascii_fname_iterator(subvol_labels, root_dirname, prefix, suffix):
-    """
-    """
+    """ """
     if subvol_labels == -1:
-        basename_filepat = prefix + '*' + suffix
+        basename_filepat = prefix + "*" + suffix
         for path, dirlist, filelist in os.walk(root_dirname):
             for ascii_basename in fnmatch.filter(filelist, basename_filepat):
                 ascii_fname = os.path.join(root_dirname, ascii_basename)
-                subvol_index = int(ascii_basename.split('.')[-2])
+                subvol_index = int(ascii_basename.split(".")[-2])
                 yield subvol_index, ascii_fname
     else:
         try:
@@ -20,13 +20,67 @@ def sf_history_ascii_fname_iterator(subvol_labels, root_dirname, prefix, suffix)
         except TypeError:
             index_generator = [subvol_labels]
         for subvol_index in index_generator:
-            ascii_basename = prefix + '.' + str(subvol_index) + suffix
+            ascii_basename = prefix + "." + str(subvol_index) + suffix
             ascii_fname = os.path.join(root_dirname, ascii_basename)
             yield subvol_index, ascii_fname
 
 
+def _get_subvol_id_strings(subvolumes):
+    n_char = max([len(str(x)) for x in subvolumes])
+    subvol_id_strings = [str(x).zfill(n_char) for x in subvolumes]
+    return subvol_id_strings
+
+
+def _infer_sorted_subvol_ids(drn):
+    """Scan the drn for the list of all available subvolumes
+
+    Parameters
+    ----------
+    drn : string
+        Parent directory of all subdirectories such as 'subvol_123'
+
+    Returns
+    -------
+    sorted_subvol_ids : list of strings
+        If drn contains subvol_25, subvol_102, subvol_5 then
+        function will return ['5', '25', ..., '102']
+        Results will be sorted according to subvolume number
+
+    """
+    subdrn_list = glob(os.path.join(drn, "subvol_*"))
+    subvol_ids = _get_subvol_id_strings([os.path.basename(s)[7:] for s in subdrn_list])
+    subvol_ids = sorted(subvol_ids, key=lambda x: int(x))
+    return subvol_ids
+
+
+def _infer_subvol_number_from_subvol_triplet(subvol_triplet, ndiv_y, ndiv_z):
+    """Calculate subvolume number from 'i_j_k'
+
+    Parameters
+    ----------
+    subvol_triplet : string
+        Should be of the form 'i_j_k'
+
+    ndiv_y : int
+        Total number of subdivisions in y-dimension
+
+    ndiv_z : int
+        Total number of subdivisions in z-dimension
+
+    """
+    ix, iy, iz = [int(s) for s in subvol_triplet.split("_")]
+    return sum(list((ndiv_y * ndiv_z * ix, ndiv_z * iy, iz)))
+
+
+def _infer_subvol_triplet_from_subvol_number(subvol_num, ndiv_y, ndiv_z):
+    """"""
+    i, rem = divmod(int(subvol_num), ndiv_y * ndiv_z)
+    j, k = divmod(rem, ndiv_z)
+    return "_".join((str(i), str(j), str(k)))
+
+
 def subvol_dirname_iterator(root_dirname, *subvol_labels):
-    """ Generator yields a sequence of absolute paths where the data from
+    """Generator yields a sequence of absolute paths where the data from
     each subvolume is stored
 
     Parameters
@@ -40,7 +94,7 @@ def subvol_dirname_iterator(root_dirname, *subvol_labels):
 
     """
     for subvol_label in subvol_labels:
-        subvol_dirname = os.path.join(root_dirname, 'subvol_' + str(subvol_label))
+        subvol_dirname = os.path.join(root_dirname, "subvol_" + str(subvol_label))
 
         msg = "\n{0} is not an existing directory\n".format(subvol_dirname)
         assert os.path.isdir(subvol_dirname), msg
@@ -49,7 +103,7 @@ def subvol_dirname_iterator(root_dirname, *subvol_labels):
 
 
 def memmap_fname_iterator(root_dirname, galprop_name, *subvol_labels):
-    """ Generator searches the input ``root_dirname`` for any subdirectory name
+    """Generator searches the input ``root_dirname`` for any subdirectory name
     matching the standard pattern, returning results only for the subvolumes
     with labels given by the input ``subvol_labels`` sequence.
 
@@ -69,8 +123,8 @@ def memmap_fname_iterator(root_dirname, galprop_name, *subvol_labels):
     """
     for subvol_dirname in subvol_dirname_iterator(root_dirname, *subvol_labels):
         galprop_dirname = os.path.join(subvol_dirname, galprop_name)
-        memmap_basename = galprop_name + '.memmap'
+        memmap_basename = galprop_name + ".memmap"
         memmap_fname = os.path.join(galprop_dirname, memmap_basename)
-        shape_basename = galprop_name + '_shape_and_dtype.txt'
+        shape_basename = galprop_name + "_shape_and_dtype.txt"
         shape_fname = os.path.join(galprop_dirname, shape_basename)
         yield memmap_fname, shape_fname

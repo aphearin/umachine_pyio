@@ -4,6 +4,9 @@ import os
 from ..directory_tree_utils import sf_history_ascii_fname_iterator
 from ..directory_tree_utils import subvol_dirname_iterator
 from ..directory_tree_utils import memmap_fname_iterator
+from ..directory_tree_utils import _infer_subvol_number_from_subvol_triplet
+from ..directory_tree_utils import _infer_subvol_triplet_from_subvol_number
+
 
 z0_root_dirname = "/Users/aphearin/work/UniverseMachine/data/0126_binaries/a_1.002310"
 z0_ascii_root_dirname = "/Users/aphearin/work/random/ARCHIVES/2017/January17/0129"
@@ -68,3 +71,14 @@ def test_memmap_fname_iterator3():
     ):
         assert os.path.isfile(memmap_fname)
         assert os.path.isfile(shape_fname)
+
+
+def test_subvol_triplet_number_consistency():
+    ndiv_y, ndiv_z = 10, 10
+
+    for subvol_num in range(20_000):
+        ijk = _infer_subvol_triplet_from_subvol_number(subvol_num, ndiv_y, ndiv_z)
+        inferred_subvol_num = _infer_subvol_number_from_subvol_triplet(
+            ijk, ndiv_y, ndiv_z
+        )
+        assert inferred_subvol_num == subvol_num
