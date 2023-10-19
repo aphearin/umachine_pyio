@@ -1,14 +1,16 @@
 """
 """
 import os
-from ..directory_tree_utils import sf_history_ascii_fname_iterator
-from ..directory_tree_utils import subvol_dirname_iterator
-from ..directory_tree_utils import memmap_fname_iterator
-from ..directory_tree_utils import _infer_subvol_number_from_subvol_triplet
-from ..directory_tree_utils import _infer_subvol_triplet_from_subvol_number
 
+from ..directory_tree_utils import (
+    _infer_subvol_number_from_subvol_triplet,
+    _infer_subvol_triplet_from_subvol_number,
+    memmap_fname_iterator,
+    sf_history_ascii_fname_iterator,
+    subvol_dirname_iterator,
+)
 
-z0_root_dirname = "/Users/aphearin/work/UniverseMachine/data/0126_binaries/a_1.002310"
+z0_root_dirname = "/Users/aphearin/work/DATA/MOCKS/UniverseMachine/a_1.002310"
 z0_ascii_root_dirname = "/Users/aphearin/work/random/ARCHIVES/2017/January17/0129"
 
 
