@@ -1,16 +1,18 @@
 """ Module storing functions used to load the UniverseMachine mock into memory.
 """
+import fnmatch
 import os
 from time import time
+
 import numpy as np
 from astropy.table import Table
-from halotools.empirical_models import enforce_periodicity_of_box
-from halotools.utils import crossmatch
-import fnmatch
 
-from .memmap_array_utils import read_ndarray_from_memmap_sequence
-from .memmap_array_utils import read_shape_and_dtype_from_ascii
 from .directory_tree_utils import memmap_fname_iterator, subvol_dirname_iterator
+from .index_utils import crossmatch
+from .memmap_array_utils import (
+    read_ndarray_from_memmap_sequence,
+    read_shape_and_dtype_from_ascii,
+)
 
 default_galprops = list(
     (
@@ -161,19 +163,7 @@ def value_added_mock(mock, Lbox):
     mock_keylist = list(mock.keys())
     xyz_keys = [key for key in xyz_keylist if key in mock_keylist]
     for xyz_key in xyz_keys:
-        vel_key = "v" + xyz_key
-
-        if vel_key in list(mock.keys()):
-            mock[xyz_key], mock[vel_key] = enforce_periodicity_of_box(
-                mock[xyz_key],
-                Lbox,
-                velocity=mock[vel_key],
-                check_multiple_box_lengths=True,
-            )
-        else:
-            mock[xyz_key] = enforce_periodicity_of_box(
-                mock[xyz_key], Lbox, check_multiple_box_lengths=True
-            )
+        mock[xyz_key] = np.mod(mock[xyz_key], Lbox)
 
     mock["halo_hostid"] = mock["halo_id"]
     satmask = mock["upid"] != -1
