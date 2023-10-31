@@ -1,3 +1,5 @@
+umachine_pyio/_version.py
+
 # Compiled files
 *.py[cod]
 *.a

@@ -1,0 +1,51 @@
+[build-system]
+requires = [
+    "setuptools>=45",
+    "setuptools_scm>=7", 
+    "tomli>=1.0.0; python_version < '3.11'",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "umachine_pyio/_version.py"
+write_to_template = "__version__ = '{version}'\n"
+
+[tool.setuptools]
+include-package-data = true
+packages = {find = {exclude=["tests*", "scripts*", "docs*", "notebooks*"]}}
+package-data = {umachine_pyio = []}
+package-dir = {umachine_pyio = "umachine_pyio"}
+
+[project.urls]
+home = "https://github.com/aphearin/umachine_pyio"
+
+[project]
+name = "umachine_pyio"
+authors = [
+    {name = "Andrew Hearin", email = "ahearin@anl.gov"},
+]
+description = "Python utilities for I/O associated with UniverseMachine"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {file = "LICENSE.rst"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+ignore = ["E231", "E241", "E501", "W503", "E203", "F403"]
+per-file-ignores = [
+    "__init__.py:F401",
+]
+max-line-length = 88
+count = true

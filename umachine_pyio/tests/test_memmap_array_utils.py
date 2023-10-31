@@ -1,13 +1,24 @@
 """
 """
+import os
+
 import numpy as np
+import pytest
+
 from ..directory_tree_utils import memmap_fname_iterator
 from ..memmap_array_utils import read_ndarray_from_memmap_sequence
 
-
 z0_root_dirname = "/Users/aphearin/work/UniverseMachine/data/0126_binaries/a_1.002310"
+MSG_HAS_TEST_DATA = "This test only runs on APH_MACHINE"
 
 
+if os.path.isdir(z0_root_dirname):
+    HAS_TEST_DATA = True
+else:
+    HAS_TEST_DATA = False
+
+
+@pytest.mark.skipif(not HAS_TEST_DATA, reason=MSG_HAS_TEST_DATA)
 def test_read_ndarray_from_memmap_sequence1():
     subvolumes = (1, 2, 3, 100)
 

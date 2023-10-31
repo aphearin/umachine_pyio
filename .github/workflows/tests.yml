@@ -1,0 +1,56 @@
+name: tests
+
+on:
+  workflow_dispatch: null
+  schedule:
+    # Runs "every Monday & Thursday at 3:05am Central"
+    - cron: '5 8 * * 1,4'
+  push:
+    branches:
+      - main
+  pull_request: null
+
+jobs:
+  tests:
+    name: tests
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.8
+          channels: conda-forge,defaults
+          channel-priority: strict
+          show-channel-urls: true
+          miniforge-version: latest
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: configure conda and install code
+          # Test against latest releases of each code in the dependency chain
+        shell: bash -l {0}
+        run: |
+          conda config --set always_yes yes
+          mamba install --quiet \
+            --file=requirements.txt
+          python -m pip install --no-deps -e .
+          mamba install -y -q \
+            flake8 \
+            pytest \
+            pytest-xdist \
+            pytest-cov \
+            pip \
+            setuptools \
+            "setuptools_scm>=7,<8" \
+            python-build \
+            flake8-pyproject
+          python -m pip install --no-build-isolation --no-deps -e .
+
+      - name: test
+        shell: bash -l {0}
+        run: |
+          pytest -v umachine_pyio --cov --cov-report=xml
