@@ -54,3 +54,27 @@ jobs:
         shell: bash -l {0}
         run: |
           pytest -v umachine_pyio --cov --cov-report=xml
+
+      - name: test versions
+        shell: bash -el {0}
+        run: |
+          pip uninstall umachine_pyio --yes
+          [[ $(python setup.py --version) != "0.0.0" ]] || exit 1
+
+          rm -rf dist/*
+          python setup.py sdist
+          pip install --no-deps --no-build-isolation dist/*.tar.gz
+          pushd ..
+          python -c "import umachine_pyio; assert umachine_pyio.__version__ != '0.0.0'"
+          popd
+          pip uninstall umachine_pyio --yes
+
+          rm -rf dist/*
+          python -m build --sdist . --outdir dist
+          pip install --no-deps --no-build-isolation dist/*.tar.gz
+          pushd ..
+          python -c "import umachine_pyio; assert umachine_pyio.__version__ != '0.0.0'"
+          popd
+          pip uninstall umachine_pyio --yes
+
+          python -m pip install -v --no-deps --no-build-isolation -e .
