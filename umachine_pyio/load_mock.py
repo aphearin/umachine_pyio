@@ -1,8 +1,8 @@
 """ Module storing functions used to load the UniverseMachine mock into memory.
 """
+
 import fnmatch
 import os
-from time import time
 
 import numpy as np
 from astropy.table import Table
@@ -66,8 +66,6 @@ def load_mock_from_binaries(subvolumes, root_dirname, galprops=default_galprops)
     mock : Astropy Table
         Table of mock galaxies with the requested properties from the requested subvolumes.
     """
-    start = time()
-
     galprops = np.array(list(set(np.atleast_1d(galprops))))
 
     mock = Table()
@@ -78,8 +76,6 @@ def load_mock_from_binaries(subvolumes, root_dirname, galprops=default_galprops)
         arr = read_ndarray_from_memmap_sequence(memmap_fnames, shape_fnames)
         mock[galprop] = arr
 
-    end = time()
-    print("Total runtime = {0:.2f} seconds".format(end - start))
     return mock
 
 
