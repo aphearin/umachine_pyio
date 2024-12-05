@@ -3,8 +3,8 @@ name: tests
 on:
   workflow_dispatch: null
   schedule:
-    # Runs "every Monday & Thursday at 3:05am Central"
-    - cron: '5 8 * * 1,4'
+    # Runs "every Thursday at 3:05am Central"
+    - cron: '5 8 * * 4'
   push:
     branches:
       - main
@@ -22,12 +22,11 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
           channels: conda-forge,defaults
           channel-priority: strict
           show-channel-urls: true
           miniforge-version: latest
-          miniforge-variant: Mambaforge
           use-mamba: true
 
       - name: configure conda and install code
